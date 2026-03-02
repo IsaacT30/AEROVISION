@@ -2,6 +2,7 @@
 from rest_framework import viewsets, filters, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from datetime import datetime
 from .models import Service
 from .serializers import ServiceSerializer, ServiceCreateUpdateSerializer
@@ -16,10 +17,12 @@ class ServiceViewSet(viewsets.ModelViewSet):
     """
     queryset = Service.objects.all()
     permission_classes = (IsAdminOrReadOnly,)
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
     filter_backends = (filters.SearchFilter, filters.OrderingFilter)
     search_fields = ('nombre', 'descripcion', 'categoria')
     ordering_fields = ('nombre', 'precio_base', 'orden', 'created_at')
-    lookup_field = 'slug'
+    # Usar ID en lugar de slug para endpoints
+    # lookup_field = 'slug'
     
     def get_queryset(self):
         qs = super().get_queryset()
@@ -40,10 +43,10 @@ class ServiceViewSet(viewsets.ModelViewSet):
         return ServiceSerializer
     
     @action(detail=True, methods=['post'], permission_classes=[permissions.AllowAny])
-    def cotizar(self, request, slug=None):
+    def cotizar(self, request, pk=None):
         """
         Endpoint para cotizar un servicio
-        POST /api/services/{slug}/cotizar/
+        POST /api/servicios/{id}/cotizar/
         Body: { "fecha": "2026-03-15", "horas": 3 }
         """
         service = self.get_object()

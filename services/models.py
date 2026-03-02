@@ -20,6 +20,7 @@ class Service(models.Model):
     slug = models.SlugField(max_length=220, unique=True)
     categoria = models.CharField(max_length=20, choices=CATEGORIA_CHOICES)
     descripcion = models.TextField()
+    imagen = models.ImageField(upload_to='servicios/', null=True, blank=True)
     
     # Precios base
     precio_base = models.DecimalField(
@@ -29,7 +30,8 @@ class Service(models.Model):
     )
     precio_por_hora = models.DecimalField(
         max_digits=10, 
-        decimal_places=2, 
+        decimal_places=2,
+        default=0,
         help_text="Precio adicional por hora"
     )
     horas_minimas = models.PositiveIntegerField(
