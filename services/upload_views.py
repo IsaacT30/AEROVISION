@@ -1,5 +1,6 @@
 # services/upload_views.py
-from rest_framework.decorators import api_view, parser_classes
+from rest_framework.decorators import api_view, parser_classes, permission_classes
+from rest_framework.permissions import AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework import status
@@ -10,6 +11,7 @@ import os
 
 @api_view(['POST'])
 @parser_classes([MultiPartParser, FormParser])
+@permission_classes([AllowAny])  # Temporal para desarrollo
 def upload_file(request):
     """
     Endpoint genérico para subir archivos
@@ -23,20 +25,27 @@ def upload_file(request):
     
     file = request.FILES['file']
     
-    # Validar tipo de archivo (imágenes)
-    allowed_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
+    # Validar tipo de archivo (imágenes y videos)
+    allowed_image_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
+    allowed_video_extensions = ['.mp4', '.mov', '.avi', '.mkv', '.webm']
+    allowed_extensions = allowed_image_extensions + allowed_video_extensions
+    
     file_ext = os.path.splitext(file.name)[1].lower()
     
     if file_ext not in allowed_extensions:
         return Response(
-            {'error': f'Tipo de archivo no permitido. Use: {", ".join(allowed_extensions)}'},
+            {'error': f'Tipo de archivo no permitido. Use imágenes ({", ".join(allowed_image_extensions)}) o videos ({", ".join(allowed_video_extensions)})'},
             status=status.HTTP_400_BAD_REQUEST
         )
     
-    # Validar tamaño (máx 5MB)
-    if file.size > 5 * 1024 * 1024:
+    # Validar tamaño según tipo
+    is_video = file_ext in allowed_video_extensions
+    max_size = 50 * 1024 * 1024 if is_video else 5 * 1024 * 1024  # 50MB para videos, 5MB para imágenes
+    max_size_mb = 50 if is_video else 5
+    
+    if file.size > max_size:
         return Response(
-            {'error': 'El archivo es demasiado grande. Máximo 5MB'},
+            {'error': f'El archivo es demasiado grande. Máximo {max_size_mb}MB'},
             status=status.HTTP_400_BAD_REQUEST
         )
     

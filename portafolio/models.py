@@ -24,10 +24,11 @@ class Portafolio(models.Model):
     tipo = models.CharField(max_length=10, choices=TIPO_CHOICES)
     descripcion = models.TextField(blank=True)
     ubicacion = models.CharField(max_length=200, blank=True)
+    destacado_en_portada = models.BooleanField(default=False, help_text="Mostrar en la portada principal")
     
     # URL o archivo
     enlace = models.URLField(blank=True, help_text="YouTube, Vimeo, etc.")
-    imagen = models.CharField(max_length=500, blank=True, help_text="URL de la imagen")
+    imagen = models.CharField(max_length=500, blank=True, help_text="URL de la imagen o video")
     
     activo = models.BooleanField(default=True)
     orden = models.PositiveIntegerField(default=0)
